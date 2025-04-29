@@ -1,82 +1,4 @@
-﻿//using Microsoft.Extensions.Configuration;
-//using Microsoft.IdentityModel.Tokens;
-//using Resume.Core.IRepository;
-//using Resume.Core.IServices;
-//using Resume.Core.Models;
-//using System;
-//using System.Collections.Generic;
-//using System.IdentityModel.Tokens.Jwt;
-//using System.Linq;
-//using System.Security.Claims;
-//using System.Text;
-//using System.Threading.Tasks;
-
-//using System;
-//using System.Collections.Generic;
-
-//namespace Resume.Service.Services
-//{
-//    public class AuthService:IAuthService
-//    {
-//        private readonly IAuthRepository _authRepository;
-//        private readonly IConfiguration _configuration;
-//        public AuthService(IAuthRepository authRepository, IConfiguration configuration)
-//        {
-//            _authRepository = authRepository;
-//            _configuration = configuration;
-//        }
-//        public async Task<(string token, User user)> LoginAsync(Login login)
-//        {
-//            var user = await _authRepository.GetUserByEmailAndPasswordAsync(login.Email, login.Password);
-
-//            if (user == null)
-//            {
-//                throw new UnauthorizedAccessException("Invalid credentials.");
-//            }
-//            var tokenHandler = new JwtSecurityTokenHandler();
-//            var key = Encoding.ASCII.GetBytes("Ic42WtyjBdYqhBSwx+HJa7FT/FWUgAISiI06ANOAZtA=");
-//            var tokenDescriptor = new SecurityTokenDescriptor
-//            {
-//                Subject = new ClaimsIdentity(new Claim[]
-//                {
-//                new Claim(ClaimTypes.Email, login.Email)
-//                }),
-//                Expires = DateTime.UtcNow.AddHours(1),
-//                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-//            };
-
-//            var token = tokenHandler.CreateToken(tokenDescriptor);
-//            var tokenString = tokenHandler.WriteToken(token);
-//            //var dtoUser = _mapper.Mapper<UserDto>(user);
-
-//            return (tokenString, user);
-
-//        }
-//        public async Task<string> RegisterUserAsync(User user)
-//        {
-//            // Hash the password
-//            await _authRepository.CreateUserAsync(user);
-
-//            // Generate JWT token
-//            var tokenHandler = new JwtSecurityTokenHandler();
-//            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]);
-//            var tokenDescriptor = new SecurityTokenDescriptor
-//            {
-//                Subject = new ClaimsIdentity(new Claim[]
-//                {
-//            new Claim(ClaimTypes.Name, user.UserID.ToString())
-//                }),
-//                Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_configuration["Jwt:ExpiryInDays"])),
-//                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-//            };
-
-//            var token = tokenHandler.CreateToken(tokenDescriptor);
-//            return tokenHandler.WriteToken(token);
-//        }
-
-//    }
-//}
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Resume.Core.IRepository;
@@ -138,15 +60,17 @@ namespace Resume.Service.Services
             return (tokenString, user);
         }
 
-        public async Task<string> RegisterUserAsync(User user)
+        public async Task<(string token, User user)> RegisterUserAsync(User user)
         {
             var existingUser = await _authRepository.GetUserByEmailAsync(user.Email);
             if (existingUser != null)
             {
                 throw new UnauthorizedAccessException("User already exists.");
             }
-            // Hash the password
-            await _authRepository.CreateUserAsync(user);
+
+            // Save user to DB
+            var savedUser = await _authRepository.CreateUserAsync(user);
+            user = await _authRepository.GetUserByEmailAsync(user.Email); // Re-fetch to ensure UserID is populated
 
             // Generate JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -166,16 +90,18 @@ namespace Resume.Service.Services
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[]
+                Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, user.UserID.ToString())
-                }),
+            new Claim(ClaimTypes.NameIdentifier, savedUser.ID.ToString()),
+            new Claim(ClaimTypes.Email, savedUser.Email)
+        }),
                 Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(expiryInDays)),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key)), SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            return (tokenHandler.WriteToken(token), savedUser);
         }
+
     }
 }

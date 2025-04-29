@@ -10,6 +10,7 @@ namespace Resume.Core.IServices
     public interface IAuthService
     {
         Task<(string token, User user)> LoginAsync(Login login);
-        Task<string> RegisterUserAsync(User user);
+        Task<(string token, User user)> RegisterUserAsync(User user);
+       
     }
 }

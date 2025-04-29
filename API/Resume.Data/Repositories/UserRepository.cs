@@ -36,7 +36,7 @@ namespace Data.Repositories
         public async Task UpdateUser(int id, User entity)
         {
             _context.Users.Update(entity);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             
         }
         public async Task DeleteUser(int id)

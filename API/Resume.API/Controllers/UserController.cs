@@ -39,6 +39,12 @@ namespace Resume.API.Controllers
             }
             return Ok(user);
         }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] User user)
+        {
+            await _userService.UpdateUser(id, user);
+            return NoContent();
+        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {

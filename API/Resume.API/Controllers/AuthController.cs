@@ -6,7 +6,6 @@ using Resume.Core.DTOs;
 using Resume.Core.IServices;
 using Resume.Core.Models;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace Resume.API.Controllers
 {
@@ -30,7 +29,7 @@ namespace Resume.API.Controllers
             {
                 var (token, user) = await _authService.LoginAsync(login);
                 var dtoUser = _mapper.Map<UserDTO>(user);
-                return Ok(new { Token = token, User = dtoUser });
+                return Ok(new { user = dtoUser, token = token }); // ✅ changed to lowercase
             }
             catch (UnauthorizedAccessException)
             {
@@ -44,6 +43,7 @@ namespace Resume.API.Controllers
             {
                 if (!ModelState.IsValid)
                     return BadRequest(ModelState);
+
                 var passwordHash = BCrypt.Net.BCrypt.HashPassword(userPost.PasswordHash);
 
                 var user = new User
@@ -51,19 +51,21 @@ namespace Resume.API.Controllers
                     Username = userPost.Username,
                     Phone = userPost.Phone,
                     Email = userPost.Email,
-                    Address = userPost.Adrress,
+                    Address = userPost.Address,
                     PasswordHash = passwordHash,
                 };
 
-                var token = await _authService.RegisterUserAsync(user);
-                return Ok(new { Token = token });
+                var (token, savedUser) = await _authService.RegisterUserAsync(user);
+                var dtoUser = _mapper.Map<UserDTO>(savedUser);
+
+                return Ok(new { user = dtoUser, token = token });
             }
             catch (UnauthorizedAccessException ex)
             {
                 return BadRequest(ex.Message);
             }
-
         }
+
 
     }
 }

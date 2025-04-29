@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Resume.Data;
 
@@ -11,9 +12,11 @@ using Resume.Data;
 namespace Resume.Data.Migrations
 {
     [DbContext(typeof(ResumeContext))]
-    partial class ResumeContextModelSnapshot : ModelSnapshot
+    [Migration("20250423193207_1234")]
+    partial class _1234
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +25,7 @@ namespace Resume.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("AIResponse", b =>
+            modelBuilder.Entity("Resume.Core.Models.AIResponse", b =>
                 {
                     b.Property<int>("AiId")
                         .ValueGeneratedOnAdd()
@@ -34,9 +37,8 @@ namespace Resume.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Age")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Age")
+                        .HasColumnType("int");
 
                     b.Property<string>("FatherName")
                         .IsRequired()
@@ -50,9 +52,8 @@ namespace Resume.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Height")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<double>("Height")
+                        .HasColumnType("float");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -173,11 +174,11 @@ namespace Resume.Data.Migrations
 
             modelBuilder.Entity("Resume.Core.Models.User", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
 
                     b.Property<string>("Address")
                         .IsRequired()
@@ -208,22 +209,20 @@ namespace Resume.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ID");
+                    b.HasKey("UserID");
 
                     b.HasIndex("SharingShareID");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("AIResponse", b =>
+            modelBuilder.Entity("Resume.Core.Models.AIResponse", b =>
                 {
-                    b.HasOne("Resume.Core.Models.User", "User")
+                    b.HasOne("Resume.Core.Models.User", null)
                         .WithMany("Files")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Resume.Core.Models.Match", b =>

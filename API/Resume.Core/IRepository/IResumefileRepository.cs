@@ -4,10 +4,10 @@ namespace Resume.Core.IRepository
 {
     public interface IResumefileRepository
     {
-        ResumeFile GetResumeFileById(int id);
-        List<IEnumerable<ResumeFile>> GetAllResumeFiles();
-        ResumeFile AddResumeFile(ResumeFile entity);
-        ResumeFile UpdateResumeFile(ResumeFile entity);
-        ResumeFile DeleteResumeFile(int id);
+        Task<ResumeFile> GetResumeFileById(int id);
+        Task<IEnumerable<ResumeFile>> GetAllResumeFiles();
+        Task<ResumeFile> AddResumeFile(ResumeFile entity);
+        Task UpdateResumeFile(ResumeFile entity);
+        Task DeleteResumeFile(int id);
     }
 }
