@@ -24,12 +24,11 @@ namespace Resume.Service.Services
     public class AIService : IAIService
     {
         private readonly HttpClient _httpClient;
-        //private readonly string _openAiApiKey;
         private readonly IAIRepository _IaIRepository;
         private readonly IMapper _mapper;
         private readonly string _myApiKey; 
 
-        public AIService(IConfiguration config, OpenAIClient openAI, IAIRepository aIRepository, IMapper mapper)
+        public AIService(OpenAIClient openAI, IAIRepository aIRepository, IMapper mapper)
         {
             _httpClient = new HttpClient();
             _myApiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");

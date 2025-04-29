@@ -42,8 +42,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ✅ Load appsettings.json (required)
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-// ✅ Register AWSOptions from configuration
-builder.Services.Configure<AWSOptions>(builder.Configuration.GetSection("AWS"));
 
 // ✅ Add services
 builder.Services.AddControllers();
